@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Thống kê -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Tổng số công việc</h5>
+                    <p class="display-4">{{ stats.total_todos }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Đã hoàn thành</h5>
+                    <p class="display-4">{{ stats.completed_todos }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Tổng số danh mục</h5>
+                    <p class="display-4">{{ stats.total_categories }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form thêm công việc mới -->
+    <div class="row mb-4">
+        <div class="col-md-6 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <form action="{{ url_for('add_todo') }}" method="post">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="todo_name" placeholder="Nhập công việc mới...">
+                            <select name="category_id" class="form-select" style="max-width: 200px;">
+                                <option value="">Không có danh mục</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <button class="btn btn-primary" type="submit">Thêm</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bộ lọc danh mục -->
+    <div class="row mb-4">
+        <div class="col-md-6 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <form action="{{ url_for('home') }}" method="get" class="d-flex">
+                        <select name="category_id" class="form-select me-2" onchange="this.form.submit()">
+                            <option value="">Tất cả danh mục</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}" {% if selected_category == category.id %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        {% if selected_category %}
+                        <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">Xóa bộ lọc</a>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách công việc -->
+    <div class="row">
+        {% for item in items %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <!-- Hiển thị trạng thái -->
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge {% if item.status == 'completed' %}bg-success{% elif item.status == 'in_progress' %}bg-warning{% else %}bg-secondary{% endif %}">
+                            {% if item.status == 'completed' %}
+                                Hoàn thành
+                            {% elif item.status == 'in_progress' %}
+                                Đang thực hiện
+                            {% else %}
+                                Chưa bắt đầu
+                            {% endif %}
+                        </span>
+                        
+                        <!-- Dropdown cập nhật trạng thái -->
+                        <form action="{{ url_for('update_status', todo_id=item.id) }}" method="post" class="d-inline">
+                            <select name="status" class="form-select form-select-sm" onchange="this.form.submit()" style="width: auto;">
+                                <option value="pending" {% if item.status == 'pending' %}selected{% endif %}>Chưa bắt đầu</option>
+                                <option value="in_progress" {% if item.status == 'in_progress' %}selected{% endif %}>Đang thực hiện</option>
+                                <option value="completed" {% if item.status == 'completed' %}selected{% endif %}>Hoàn thành</option>
+                            </select>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <h5 class="card-title">{{ item.name }}</h5>
+                    
+                    <!-- Hiển thị thời gian và danh mục -->
+                    <div class="text-muted small mb-3">
+                        <div>Tạo lúc: {{ item.created_at.strftime('%d/%m/%Y %H:%M') }}</div>
+                        {% if item.finished_at %}
+                        <div>Hoàn thành: {{ item.finished_at.strftime('%d/%m/%Y %H:%M') }}</div>
+                        {% endif %}
+                        {% if item.category %}
+                        <div class="mt-2">
+                            <a href="{{ url_for('home', category_id=item.category.id) }}" class="text-decoration-none">
+                                <span class="badge category-color-dot" data-color="{{ item.category.color }}">
+                                    {{ item.category.name }}
+                                </span>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Các nút thao tác -->
+                    <div class="btn-group">
+                        <form action="{{ url_for('checked_todo', todo_id=item.id) }}" method="post" class="me-2">
+                            <button type="submit" class="btn btn-sm {% if item.checked %}btn-success{% else %}btn-outline-success{% endif %}">
+                                {% if item.checked %}
+                                <i class="fas fa-check-circle"></i> Hoàn thành
+                                {% else %}
+                                <i class="far fa-circle"></i> Chưa hoàn thành
+                                {% endif %}
+                            </button>
+                        </form>
+                        <a href="{{ url_for('edit_todo', todo_id=item.id) }}" class="btn btn-sm btn-outline-primary me-2">
+                            <i class="fas fa-edit"></i> Sửa
+                        </a>
+                        <a href="{{ url_for('todo_notes', todo_id=item.id) }}" class="btn btn-sm btn-outline-info">
+                            <i class="fas fa-sticky-note"></i> Ghi chú
+                            {% if item.notes|length > 0 %}
+                            <span class="badge bg-info">{{ item.notes|length }}</span>
+                            {% endif %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Phân trang -->
+    {% if pagination %}
+    <div class="row mt-4">
+        <div class="col">
+            <nav>
+                <ul class="pagination justify-content-center">
+                    {% if pagination.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('home', page=pagination.prev_num) }}">Trước</a>
+                    </li>
+                    {% endif %}
+
+                    {% for page_num in pagination.iter_pages() %}
+                    {% if page_num %}
+                    <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('home', page=page_num) }}">{{ page_num }}</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if pagination.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('home', page=pagination.next_num) }}">Sau</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Thêm Font Awesome vào base.html nếu chưa có -->
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+    .card {
+        transition: transform 0.2s;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .card-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+</style>
+{% endblock %}
+{% endblock %}

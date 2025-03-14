@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Thống kê tổng quan -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Tổng số người dùng</h5>
+                    <p class="display-4">{{ total_stats.users }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Tổng số công việc</h5>
+                    <p class="display-4">{{ total_stats.todos }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Tổng số danh mục</h5>
+                    <p class="display-4">{{ total_stats.categories }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách người dùng -->
+    <div class="card">
+        <div class="card-header">
+            <h5>Quản lý người dùng</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Avatar</th>
+                            <th>Tên đăng nhập</th>
+                            <th>Trạng thái</th>
+                            <th>Số công việc</th>
+                            <th>Đã hoàn thành</th>
+                            <th>Số danh mục</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        {% if user.username != "ThuyKieu" %}  <!-- Không hiển thị admin -->
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>
+                                <img src="{{ url_for('static', filename='avatars/' + user.avatar) }}" 
+                                     alt="Avatar" 
+                                     class="rounded-circle"
+                                     style="width: 40px; height: 40px;">
+                            </td>
+                            <td>{{ user.username }}</td>
+                            <td>
+                                {% if user.blocked %}
+                                <span class="badge bg-danger">Đã khóa</span>
+                                {% else %}
+                                <span class="badge bg-success">Hoạt động</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user_stats[user.id].total_todos }}</td>
+                            <td>{{ user_stats[user.id].completed_todos }}</td>
+                            <td>{{ user_stats[user.id].total_categories }}</td>
+                            <td>
+                                <!-- Nút xem chi tiết -->
+                                <a href="{{ url_for('user_details', user_id=user.id) }}" 
+                                   class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+
+                                <!-- Nút khóa/mở khóa -->
+                                {% if user.blocked %}
+                                <form action="{{ url_for('unblock_user', user_id=user.id) }}" 
+                                      method="post" 
+                                      style="display: inline;">
+                                    <button type="submit" class="btn btn-sm btn-success">
+                                        <i class="fas fa-unlock"></i>
+                                    </button>
+                                </form>
+                                {% else %}
+                                <form action="{{ url_for('block_user', user_id=user.id) }}" 
+                                      method="post" 
+                                      style="display: inline;">
+                                    <button type="submit" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-lock"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                                <!-- Nút đặt lại mật khẩu -->
+                                <button type="button" 
+                                        class="btn btn-sm btn-danger" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#resetPasswordModal{{ user.id }}">
+                                    <i class="fas fa-key"></i>
+                                </button>
+
+                                <!-- Modal đặt lại mật khẩu -->
+                                <div class="modal fade" id="resetPasswordModal{{ user.id }}">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Đặt lại mật khẩu cho {{ user.username }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <form action="{{ url_for('reset_password', user_id=user.id) }}" method="post">
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <label for="new_password" class="form-label">Mật khẩu mới</label>
+                                                        <input type="password" 
+                                                               class="form-control" 
+                                                               name="new_password" 
+                                                               required>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" 
+                                                            class="btn btn-secondary" 
+                                                            data-bs-dismiss="modal">Hủy</button>
+                                                    <button type="submit" class="btn btn-primary">Xác nhận</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Thêm Font Awesome nếu chưa có -->
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
+{% endblock %}

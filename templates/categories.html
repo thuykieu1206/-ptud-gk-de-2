@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+.category-color-dot {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
+</style>
+
+<div class="container mt-4">
+    <!-- Form thêm danh mục -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Thêm danh mục mới</h5>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('add_category') }}" method="post">
+                <div class="row">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" name="name" placeholder="Tên danh mục" required>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="color" class="form-control" name="color" value="#3498db">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Thêm</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Danh sách danh mục -->
+    <div class="card">
+        <div class="card-header">
+            <h5>Danh sách danh mục</h5>
+        </div>
+        <div class="card-body">
+            <div class="list-group">
+                {% for category in categories %}
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="category-color-dot" data-color="{{ category.color }}"></span>
+                        {{ category.name }}
+                        <span class="badge bg-secondary">{{ category.todos|length }} công việc</span>
+                    </div>
+                    <form action="{{ url_for('delete_category', id=category.id) }}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc muốn xóa?')">Xóa</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.category-color-dot').forEach(dot => {
+    dot.style.backgroundColor = dot.dataset.color;
+});
+</script>
+{% endblock %}

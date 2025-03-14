@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <img src="{{ url_for('static', filename='avatars/' + current_user.avatar) }}" 
+                         class="rounded-circle mb-3" 
+                         style="width: 150px; height: 150px; object-fit: cover;"
+                         alt="Avatar">
+                    
+                    <h3 class="mb-4">{{ current_user.username }}</h3>
+                    
+                    <div class="mb-4">
+                        <form action="{{ url_for('upload_avatar') }}" method="post" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="avatar" class="form-label">Tải lên ảnh đại diện</label>
+                                <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Tải lên</button>
+                        </form>
+                    </div>
+
+                    <div>
+                        <form action="{{ url_for('upload_avatar') }}" method="post">
+                            <button type="submit" class="btn btn-success">
+                                Tạo avatar ngẫu nhiên
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('avatar').onchange = function(evt) {
+    const [file] = this.files;
+    if (file) {
+        const preview = document.querySelector('img');
+        preview.src = URL.createObjectURL(file);
+    }
+};
+</script>
+{% endblock %} 

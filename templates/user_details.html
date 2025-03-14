@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">
+                    <i class="fas {% if user.is_admin %}fa-star{% else %}fa-user{% endif %} me-2"></i>
+                    {{ user.username }}
+                </h3>
+                <a href="{{ url_for('admin') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thống kê -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Tổng công việc</h5>
+                    <p class="display-4">{{ stats.total }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Đã hoàn thành</h5>
+                    <p class="display-4">{{ stats.completed }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Tỷ lệ hoàn thành</h5>
+                    <p class="display-4">{{ "%.1f"|format(stats.completion_rate) }}%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thanh tiến độ -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Tiến độ công việc</h5>
+            <div class="progress" style="height: 20px;">
+                <div class="progress-bar bg-success" 
+                     role="progressbar" 
+                     style="width: {{ stats.completion_rate }}%"
+                     aria-valuenow="{{ stats.completion_rate }}" 
+                     aria-valuemin="0" 
+                     aria-valuemax="100">
+                    {{ "%.1f"|format(stats.completion_rate) }}%
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách công việc -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Danh sách công việc</h5>
+        </div>
+        <div class="card-body">
+            {% if todos %}
+                <div class="list-group">
+                    {% for todo in todos %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <span class="me-2">
+                                    {% if todo.checked %}
+                                        <i class="fas fa-check-circle text-success"></i>
+                                    {% else %}
+                                        <i class="far fa-circle"></i>
+                                    {% endif %}
+                                </span>
+                                <span class="{% if todo.checked %}text-decoration-line-through text-muted{% endif %}">
+                                    {{ todo.name }}
+                                </span>
+                            </div>
+                            <div class="btn-group">
+                                <!-- Nút đánh dấu hoàn thành -->
+                                <form action="{{ url_for('checked_todo', todo_id=todo.id) }}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-success me-1">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+                                
+                                <!-- Nút ghi chú -->
+                                <a href="{{ url_for('todo_notes', todo_id=todo.id) }}" 
+                                   class="btn btn-sm btn-outline-info me-1">
+                                    <i class="fas fa-sticky-note"></i>
+                                </a>
+
+                                <!-- Nút xóa -->
+                                <form action="{{ url_for('delete_tasks') }}" method="post" class="d-inline">
+                                    <input type="hidden" name="task_ids" value="{{ todo.id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            onclick="return confirm('Bạn có chắc muốn xóa công việc này?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted mb-0">Chưa có công việc nào</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Các nút quản lý người dùng -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Quản lý người dùng</h5>
+            <div class="d-flex gap-2">
+                {% if not user.is_admin %}
+                    {% if user.blocked %}
+                    <form action="{{ url_for('unblock_user', user_id=user.id) }}" method="post">
+                        <button type="submit" class="btn btn-success" 
+                                onclick="return confirm('Bạn có chắc muốn mở khóa người dùng này?')">
+                            <i class="fas fa-unlock"></i> Mở khóa
+                        </button>
+                    </form>
+                    {% else %}
+                    <form action="{{ url_for('block_user', user_id=user.id) }}" method="post">
+                        <button type="submit" class="btn btn-warning" 
+                                onclick="return confirm('Bạn có chắc muốn khóa người dùng này?')">
+                            <i class="fas fa-lock"></i> Khóa
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    <button type="button" 
+                            class="btn btn-info" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#resetPasswordModal">
+                        <i class="fas fa-key"></i> Đặt lại mật khẩu
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal đặt lại mật khẩu -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-key"></i> 
+                    Đặt lại mật khẩu cho {{ user.username }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('reset_password', user_id=user.id) }}" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">Mật khẩu mới</label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="newPassword" 
+                               name="new_password" 
+                               required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Xác nhận</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

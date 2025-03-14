@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-plus"></i> Đăng ký tài khoản
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Form đăng ký -->
+                    <form method="post" class="needs-validation" novalidate>
+                        <!-- Username -->
+                        <div class="mb-4">
+                            <label for="username" class="form-label">
+                                <i class="fas fa-user"></i> Tên đăng nhập
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="username" 
+                                   name="username" 
+                                   required
+                                   minlength="3"
+                                   pattern="[A-Za-z0-9]+"
+                                   placeholder="Nhập tên đăng nhập">
+                            <div class="form-text text-muted">
+                                Tên đăng nhập phải có ít nhất 3 ký tự, chỉ bao gồm chữ cái và số
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-4">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock"></i> Mật khẩu
+                            </label>
+                            <div class="input-group">
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="password" 
+                                       name="password" 
+                                       required
+                                       minlength="6"
+                                       placeholder="Nhập mật khẩu">
+                                <button class="btn btn-outline-secondary" 
+                                        type="button" 
+                                        onclick="togglePassword()">
+                                    <i class="fas fa-eye" id="toggleIcon"></i>
+                                </button>
+                            </div>
+                            <div class="form-text text-muted">
+                                Mật khẩu phải có ít nhất 6 ký tự
+                            </div>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div class="mb-4">
+                            <label for="confirm_password" class="form-label">
+                                <i class="fas fa-lock"></i> Xác nhận mật khẩu
+                            </label>
+                            <input type="password" 
+                                   class="form-control" 
+                                   id="confirm_password" 
+                                   name="confirm_password" 
+                                   required
+                                   placeholder="Nhập lại mật khẩu">
+                            <div class="invalid-feedback">
+                                Mật khẩu xác nhận không khớp
+                            </div>
+                        </div>
+
+                        <!-- Nút đăng ký -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-user-plus"></i> Đăng ký
+                            </button>
+                            <a href="{{ url_for('login') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-sign-in-alt"></i> Đã có tài khoản? Đăng nhập
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Hiển thị thông báo lỗi/thành công -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show mt-3" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript cho form validation và toggle password -->
+<script>
+// Kiểm tra form trước khi submit
+document.querySelector('form').addEventListener('submit', function(event) {
+    if (!this.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    // Kiểm tra mật khẩu xác nhận
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirm_password');
+    if (password.value !== confirmPassword.value) {
+        confirmPassword.setCustomValidity('Mật khẩu xác nhận không khớp');
+        event.preventDefault();
+    } else {
+        confirmPassword.setCustomValidity('');
+    }
+
+    this.classList.add('was-validated');
+});
+
+// Hiển thị/ẩn mật khẩu
+function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const toggleIcon = document.getElementById('toggleIcon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+    }
+}
+
+// Kiểm tra mật khẩu xác nhận khi nhập
+document.getElementById('confirm_password').addEventListener('input', function() {
+    const password = document.getElementById('password').value;
+    if (this.value !== password) {
+        this.setCustomValidity('Mật khẩu xác nhận không khớp');
+    } else {
+        this.setCustomValidity('');
+    }
+});
+</script>
+{% endblock %}
