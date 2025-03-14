@@ -32,8 +32,6 @@ Dự án này là một ứng dụng quản lý công việc (ToDo App) được
 - **Quản Lý Hồ Sơ Cá Nhân:** Người dùng có thể cập nhật thông tin và avatar của mình.
 - **Quản Trị Viên:** Quản lý người dùng và công việc thông qua giao diện quản trị.
 
-## Hướng Dẫn Sử Dụng
-
 ### Đăng Ký Tài Khoản
 1. Truy cập trang đăng ký.
 2. Nhập tên người dùng, mật khẩu và xác nhận mật khẩu.
