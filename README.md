@@ -51,3 +51,26 @@ Dự án này là một ứng dụng quản lý công việc (ToDo App) được
 
 ### Quản Lý Danh Mục
 - Người dùng có thể thêm hoặc xóa danh mục công việc từ trang quản lý danh mục.
+
+## Hướng Dẫn Cài Đặt, Chạy
+1. **Clone Repository:**
+   ```bash
+   git clone https://github.com/thuykieu1206/-ptud-gk-de-2.git
+   ```
+
+2. **Cài đặt yêu cầu:**
+   ```bash
+   cd -ptud-gk-de-2
+   pip install -r requirements.txt
+   ```
+
+3. **Chạy ứng dụng:**
+   ```bash
+   python app.py
+   ```
+
+4. **Truy cập ứng dụng:**
+   Mở trình duyệt và truy cập `http://127.0.0.1:5000`.
+
+## Link Project Đã Triển Khai
+- [Link đến project trên GitHub] `https://github.com/thuykieu1206/-ptud-gk-de-2'.
