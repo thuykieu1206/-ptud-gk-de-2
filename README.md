@@ -20,8 +20,6 @@ Dự án này là một ứng dụng quản lý công việc (ToDo App) được
 - **SQLite:** Cơ sở dữ liệu nhẹ.
 - **HTML, CSS, JavaScript:** Giao diện người dùng.
 
-## Hướng Dẫn Cài Đặt
-
 
 ## Tính Năng
 - **Đăng Ký và Đăng Nhập:** Người dùng có thể tạo tài khoản và đăng nhập để quản lý công việc của mình.
